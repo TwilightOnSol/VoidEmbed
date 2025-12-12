@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Void Search</title>
+  <style>
+    body { font-family: Arial; max-width: 800px; margin: 50px auto; }
+    input { width: 70%; padding: 12px; font-size: 16px; }
+    button { padding: 12px 20px; font-size: 16px; background: #000; color: white; border: none; cursor: pointer; }
+    .results { margin-top: 20px; }
+    .result { margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <input type="text" id="query" placeholder="Ask Void anything..." onkeypress="if(event.key=='Enter') search()">
+  <button onclick="search()">Search Void</button>
+  <div id="results" class="results"></div>
+
+  <script>
+    async function search() {
+      const query = document.getElementById('query').value;
+      if (!query) return;
+      
+      document.getElementById('results').innerHTML = 'Searching...';
+      
+      try {
+        // Void's public search endpoint (adjust if needed)
+        const response = await fetch(`https://askvoid.com/search?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        
+        let html = '';
+        data.results?.forEach(result => {
+          html += `<div class="result">
+            <h3><a href="${result.url}" target="_blank">${result.title}</a></h3>
+            <p>${result.snippet}</p>
+          </div>`;
+        });
+        
+        document.getElementById('results').innerHTML = html || '<p>No results found.</p>';
+      } catch (e) {
+        document.getElementById('results').innerHTML = '<p>Search error. Try again.</p>';
+      }
+    }
+  </script>
+</body>
+</html>
