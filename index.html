@@ -2,42 +2,103 @@
 <html>
 <head>
   <title>Void Search</title>
+  <!-- FIXES FOR NOTION EMBED -->
+  <meta http-equiv="X-Frame-Options" content="ALLOWALL">
+  <meta http-equiv="Content-Security-Policy" content="frame-ancestors 'self' notion.so *.notion.so notion-static.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
   <style>
-    body { font-family: Arial; max-width: 800px; margin: 50px auto; }
-    input { width: 70%; padding: 12px; font-size: 16px; }
-    button { padding: 12px 20px; font-size: 16px; background: #000; color: white; border: none; cursor: pointer; }
-    .results { margin-top: 20px; }
-    .result { margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+      background: #000; color: #fff; padding: 20px; min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    input { 
+      width: 70%; padding: 15px; font-size: 18px; border: none; 
+      border-radius: 25px 0 0 25px; outline: none; background: #333;
+      color: #fff; padding-left: 20px;
+    }
+    button { 
+      padding: 15px 25px; font-size: 18px; background: #fff; color: #000; 
+      border: none; border-radius: 0 25px 25px 0; cursor: pointer; 
+      font-weight: bold;
+    }
+    button:hover { background: #f0f0f0; }
+    #results { margin-top: 30px; }
+    .result { 
+      background: #111; margin: 20px 0; padding: 20px; 
+      border-radius: 10px; border-left: 4px solid #fff;
+    }
+    .result h3 { margin-bottom: 10px; }
+    .result a { color: #4a90e2; text-decoration: none; }
+    .result a:hover { text-decoration: underline; }
+    .loading { text-align: center; color: #888; font-style: italic; }
+    @media (max-width: 768px) {
+      input { width: 60%; font-size: 16px; }
+      button { padding: 15px 20px; font-size: 16px; }
+    }
   </style>
 </head>
 <body>
-  <input type="text" id="query" placeholder="Ask Void anything..." onkeypress="if(event.key=='Enter') search()">
-  <button onclick="search()">Search Void</button>
-  <div id="results" class="results"></div>
+  <div class="container">
+    <h1 style="margin-bottom: 30px; text-align: center;">🔎 Void Search</h1>
+    <div style="display: flex;">
+      <input type="text" id="query" placeholder="Ask Void anything..." 
+             onkeypress="if(event.key=='Enter') searchVoid()">
+      <button onclick="searchVoid()">Search</button>
+    </div>
+    <div id="results"></div>
+  </div>
 
   <script>
-    async function search() {
-      const query = document.getElementById('query').value;
+    async function searchVoid() {
+      const query = document.getElementById('query').value.trim();
       if (!query) return;
       
-      document.getElementById('results').innerHTML = 'Searching...';
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<div class="loading">Searching Void...</div>';
       
       try {
-        // Void's public search endpoint (adjust if needed)
-        const response = await fetch(`https://askvoid.com/search?q=${encodeURIComponent(query)}`);
-        const data = await response.json();
+        // Try multiple Void endpoints (fallback chain)
+        const endpoints = [
+          `https://askvoid.com/search?q=${encodeURIComponent(query)}`,
+          `https://api.askvoid.com/search?q=${encodeURIComponent(query)}`,
+          `https://void.com/search?q=${encodeURIComponent(query)}`
+        ];
         
-        let html = '';
-        data.results?.forEach(result => {
-          html += `<div class="result">
-            <h3><a href="${result.url}" target="_blank">${result.title}</a></h3>
-            <p>${result.snippet}</p>
-          </div>`;
-        });
+        let data;
+        for (let url of endpoints) {
+          try {
+            const response = await fetch(url, { 
+              method: 'GET',
+              headers: { 'Accept': 'application/json' }
+            });
+            if (response.ok) {
+              data = await response.json();
+              break;
+            }
+          } catch (e) {
+            continue;
+          }
+        }
         
-        document.getElementById('results').innerHTML = html || '<p>No results found.</p>';
+        if (data && data.results) {
+          let html = '';
+          data.results.forEach(result => {
+            html += `
+              <div class="result">
+                <h3><a href="${result.url || '#'}" target="_blank">${result.title || 'No title'}</a></h3>
+                <p>${result.snippet || result.description || 'No description'}</p>
+              </div>
+            `;
+          });
+          resultsDiv.innerHTML = html || '<p style="text-align:center;color:#888;">No results found.</p>';
+        } else {
+          resultsDiv.innerHTML = '<p style="text-align:center;color:#888;">No results or API unavailable.</p>';
+        }
       } catch (e) {
-        document.getElementById('results').innerHTML = '<p>Search error. Try again.</p>';
+        resultsDiv.innerHTML = '<p style="text-align:center;color:#888;">Search error. Try again or visit <a href="https://askvoid.com" target="_blank" style="color:#4a90e2;">askvoid.com</a></p>';
       }
     }
   </script>
