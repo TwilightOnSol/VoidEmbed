@@ -1,47 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Void Search</title>
+  <title>AI Search</title>
   <meta http-equiv="X-Frame-Options" content="ALLOWALL">
   <meta http-equiv="Content-Security-Policy" content="frame-ancestors 'self' notion.so *.notion.so">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, sans-serif; background: #000; color: #fff; padding: 20px; }
-    .container { max-width: 800px; margin: 0 auto; }
-    input { width: 70%; padding: 15px; font-size: 18px; border: none; border-radius: 25px 0 0 25px; background: #333; color: #fff; }
-    button { padding: 15px 25px; font-size: 18px; background: #fff; color: #000; border: none; border-radius: 0 25px 25px 0; cursor: pointer; font-weight: bold; }
-    .results { margin-top: 20px; text-align: center; }
-    .search-link { display: inline-block; margin-top: 20px; padding: 15px 30px; background: #4a90e2; color: white; text-decoration: none; border-radius: 25px; font-size: 18px; }
+    body { font-family: system-ui; background: #000; color: #fff; padding: 30px; max-width: 700px; margin: 0 auto; }
+    input { width: 70%; padding: 18px; font-size: 18px; border: none; border-radius: 30px 0 0 30px; background: #222; color: #fff; }
+    button { padding: 18px 30px; font-size: 18px; background: #fff; color: #000; border: none; border-radius: 0 30px 30px 0; cursor: pointer; font-weight: 600; }
+    #results { margin-top: 30px; }
+    .result { background: #111; margin: 20px 0; padding: 25px; border-radius: 15px; border-left: 5px solid #4a90e2; }
+    .result h3 a { color: #4a90e2; text-decoration: none; font-size: 20px; }
+    .result p { color: #ccc; margin-top: 10px; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1 style="margin-bottom: 30px; text-align: center;">🔎 Void Search</h1>
-    <div style="display: flex;">
-      <input type="text" id="query" placeholder="Ask Void anything..." onkeypress="if(event.key=='Enter') goToVoid()">
-      <button onclick="goToVoid()">Search Void</button>
-    </div>
-    <div id="results" class="results">
-      <p>Enter your search and click Search Void</p>
-    </div>
+  <h1 style="text-align: center; margin-bottom: 40px;">🔎 AI Search</h1>
+  <div style="display: flex;">
+    <input type="text" id="query" placeholder="Search anything..." onkeypress="if(event.key=='Enter') search()">
+    <button onclick="search()">Search</button>
   </div>
+  <div id="results"></div>
 
   <script>
-    function goToVoid() {
-      const query = document.getElementById('query').value.trim();
-      if (!query) return;
+    async function search() {
+      const q = document.getElementById('query').value.trim();
+      if(!q) return;
       
-      const encodedQuery = encodeURIComponent(query);
-      const voidUrl = `https://askvoid.com/search?q=${encodedQuery}`;
+      document.getElementById('results').innerHTML = 'Searching...';
       
-      // Open in new tab (works everywhere)
-      window.open(voidUrl, '_blank');
+      const url = `https://www.perplexity.ai/search?q=${encodeURIComponent(q)}`;
+      window.open(url, '_blank');
       
-      // Show confirmation
       document.getElementById('results').innerHTML = `
-        <p>✅ Opening Void search for "${query}"...</p>
-        <a href="${voidUrl}" class="search-link" target="_blank">🔗 Open in new tab</a>
+        <div style="text-align:center;padding:40px;color:#888;">
+          <p>✅ Opening search for "${q}"</p>
+          <a href="${url}" target="_blank" style="display:inline-block;margin-top:20px;padding:15px 30px;background:#4a90e2;color:white;text-decoration:none;border-radius:25px;">🔗 Open Results</a>
+        </div>
       `;
     }
   </script>
